@@ -11,6 +11,7 @@ import java.util.LinkedList;
 import java.util.List;
 import javax.swing.JScrollPane;
 import javax.swing.JTextArea;
+import java.awt.Insets;
 
 public class Logger extends OutputStream {
     public static Logger LOGGER;
@@ -21,6 +22,7 @@ public class Logger extends OutputStream {
 
     static {
         JTextArea textArea = new JTextArea(15, 45);
+        textArea.setMargin(new Insets(2, 6, 2, 2));
         textArea.addMouseListener(new MouseAdapter() {
             @Override
             public void mouseClicked(MouseEvent e) {
@@ -43,6 +45,20 @@ public class Logger extends OutputStream {
 
     public Appender getAppender() {
         return appender;
+    }
+
+    public static JScrollPane createMirrorPane() {
+        JTextArea textArea = new JTextArea(15, 45);
+        textArea.setMargin(new Insets(2, 6, 2, 2));
+        textArea.setEditable(false);
+        Appender app = LOGGER.appender;
+        if (app != null) {
+            app.addSink(textArea);
+            textArea.setText(app.getTextArea().getText());
+            textArea.setCaretPosition(textArea.getDocument().getLength());
+        }
+        return new JScrollPane(textArea,
+                JScrollPane.VERTICAL_SCROLLBAR_ALWAYS, JScrollPane.HORIZONTAL_SCROLLBAR_AS_NEEDED);
     }
 
     public synchronized void clear() {
@@ -82,6 +98,7 @@ public class Logger extends OutputStream {
         private static final String EOL2 = System.getProperty("line.separator", EOL1);
 
         private final JTextArea textArea;
+        private final List<JTextArea> sinks = new ArrayList<>();
         private final int maxLines = 2000;
         private final LinkedList<Integer> lengths;
         private final List<String> values;
@@ -91,6 +108,7 @@ public class Logger extends OutputStream {
 
         private Appender(JTextArea textArea) {
             this.textArea = textArea;
+            sinks.add(textArea);
             lengths = new LinkedList<>();
             values = new ArrayList<>();
 
@@ -105,6 +123,10 @@ public class Logger extends OutputStream {
 
         public JTextArea getTextArea() {
             return textArea;
+        }
+
+        public synchronized void addSink(JTextArea area) {
+            sinks.add(area);
         }
 
         public synchronized void append(String val) {
@@ -128,18 +150,25 @@ public class Logger extends OutputStream {
 
         public synchronized void run() {
             if (clear) {
-                textArea.setText("");
+                for (JTextArea area : sinks) {
+                    area.setText("");
+                }
             }
             for (String val : values) {
                 curLength += val.length();
                 if (val.endsWith(EOL1) || val.endsWith(EOL2)) {
                     if (lengths.size() >= maxLines) {
-                        textArea.replaceRange("", 0, lengths.removeFirst());
+                        int cut = lengths.removeFirst();
+                        for (JTextArea area : sinks) {
+                            area.replaceRange("", 0, cut);
+                        }
                     }
                     lengths.addLast(curLength);
                     curLength = 0;
                 }
-                textArea.append(val);
+                for (JTextArea area : sinks) {
+                    area.append(val);
+                }
             }
             values.clear();
             clear = false;

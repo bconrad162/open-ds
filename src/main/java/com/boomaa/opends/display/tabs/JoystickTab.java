@@ -51,7 +51,7 @@ public class JoystickTab extends TabBase {
         EmbeddedJDEC.LIST.setLayoutOrientation(JList.VERTICAL);
         EmbeddedJDEC.LIST_SCR.setHorizontalScrollBarPolicy(JScrollPane.HORIZONTAL_SCROLLBAR_AS_NEEDED);
         EmbeddedJDEC.LIST_SCR.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED);
-        EmbeddedJDEC.LIST_SCR.setPreferredSize(new Dimension(200, 100));
+        EmbeddedJDEC.LIST_SCR.setPreferredSize(new Dimension(260, 120));
 
         for (HIDDevice hid : ControlDevices.getAll().values()) {
             EmbeddedJDEC.LIST_MODEL.add(EmbeddedJDEC.LIST_MODEL.size(), hid);
@@ -62,7 +62,10 @@ public class JoystickTab extends TabBase {
         EmbeddedJDEC.DISABLE_BTN.setEnabled(false);
         EmbeddedJDEC.INDEX_SET.setEnabled(false);
         EmbeddedJDEC.REASSIGN_AXES_BTN.setEnabled(false);
-        EmbeddedJDEC.INDEX_SET.setColumns(4);
+        EmbeddedJDEC.INDEX_SET.setColumns(8);
+        Dimension indexSize = new Dimension(80, 26);
+        EmbeddedJDEC.INDEX_SET.setPreferredSize(indexSize);
+        EmbeddedJDEC.INDEX_SET.setMinimumSize(indexSize);
 
         EmbeddedJDEC.LIST.getSelectionModel().addListSelectionListener((e) -> {
             if (e.getValueIsAdjusting()) {
@@ -152,9 +155,15 @@ public class JoystickTab extends TabBase {
             .setAnchor(GridBagConstraints.LINE_END);
 
         base.clone().setPos(0, 0, 1, 1).setFill(GridBagConstraints.NONE).build(new JLabel("Index"));
-        base.clone().setPos(0, 1, 1, 1).setFill(GridBagConstraints.NONE).build(EmbeddedJDEC.INDEX_SET);
+        base.clone().setPos(0, 1, 1, 1)
+            .setFill(GridBagConstraints.HORIZONTAL)
+            .setWeightX(0.2)
+            .build(EmbeddedJDEC.INDEX_SET);
 
-        base.clone().setPos(1, 0, 2, 3).build(EmbeddedJDEC.LIST_SCR);
+        base.clone().setPos(1, 0, 2, 3)
+            .setWeightX(1)
+            .setWeightY(1)
+            .build(EmbeddedJDEC.LIST_SCR);
 
         base.clone().setPos(3, 0, 1, 1).setAnchor(GridBagConstraints.LINE_START).build(EmbeddedJDEC.UP_BTN);
         base.clone().setPos(3, 1, 1, 1).setAnchor(GridBagConstraints.LINE_START).build(EmbeddedJDEC.DOWN_BTN);

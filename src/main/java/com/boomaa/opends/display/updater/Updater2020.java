@@ -17,6 +17,7 @@ import com.boomaa.opends.display.DisplayEndpoint;
 import com.boomaa.opends.display.RobotMode;
 import com.boomaa.opends.display.tabs.JoystickTab;
 import com.boomaa.opends.display.tabs.TabBase;
+import com.boomaa.opends.networking.AddressConstants;
 import com.boomaa.opends.util.DSLog;
 import com.boomaa.opends.util.EventSeverity;
 import com.boomaa.opends.util.NumberUtils;
@@ -44,8 +45,10 @@ public class Updater2020 extends ElementUpdater {
         if (robotConn) {
             boolean isRealRobot = rioUdp.getTrace().contains(Trace.ISROBORIO);
             ROBOT_CONNECTION_STATUS.changeToDisplay(isRealRobot ? 0 : 1, true);
+            RIO_CONNECTION_PATH.setText(AddressConstants.getConnectedRioLabel());
         } else {
             ROBOT_CONNECTION_STATUS.forceHide();
+            RIO_CONNECTION_PATH.forceHide();
         }
 
         BAT_VOLTAGE.setText(StringUtils.padDouble(NumberUtils.roundTo(rioUdp.getBatteryVoltage(), 2), 2) + " V");
@@ -134,13 +137,17 @@ public class Updater2020 extends ElementUpdater {
                 TagValueMap<?> errorMessage = em.first();
                 String error = (String) errorMessage.get("Details") + errorMessage.get("Location") + errorMessage.get("Call Stack");
                 String flag = (String) errorMessage.get("Flag");
-                DSLog.queueEvent(error, flag != null && flag.equals("Error") ? EventSeverity.ERROR : EventSeverity.WARNING);
+                DSLog.queueEvent(
+                        error,
+                        flag != null && flag.equals("Error") ? EventSeverity.ERROR : EventSeverity.WARNING,
+                        true
+                );
             }
 
             TVMList so = tagMap.getMatching(ReceiveTag.STANDARD_OUT);
             if (!so.isEmpty()) {
                 TagValueMap<?> stdOut = so.first();
-                DSLog.queueEvent((String) stdOut.get("Message"), EventSeverity.INFO);
+                DSLog.queueEvent((String) stdOut.get("Message"), EventSeverity.INFO, true);
             }
         }
     }
@@ -187,6 +194,7 @@ public class Updater2020 extends ElementUpdater {
         IS_ENABLED.setEnabled(false);
         BAT_VOLTAGE.setText("0.00 V");
         ROBOT_CONNECTION_STATUS.forceHide();
+        RIO_CONNECTION_PATH.forceHide();
         ROBOT_CODE_STATUS.forceHide();
         ESTOP_STATUS.forceHide();
     }

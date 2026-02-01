@@ -42,7 +42,7 @@ public class TCPInterface implements NetworkInterface {
     }
 
     public TCPInterface(String ip, int port) throws SocketException {
-        this(ip, port, 1000);
+        this(ip, port, 200);
     }
 
     @Override

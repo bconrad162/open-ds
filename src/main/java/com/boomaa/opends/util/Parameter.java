@@ -24,8 +24,7 @@ public enum Parameter {
     GAME_DATA("--game-data", Type.STRING,  MainJDEC.GAME_DATA.getElement()),
     PROTOCOL_YEAR("--protocol-year", Type.INTEGER, MainJDEC.PROTOCOL_YEAR.getElement(), getProtocolYears()),
     ROBOT_DRIVE_MODE("--robot-mode", Type.STRING, MainJDEC.ROBOT_DRIVE_MODE.getElement(), getRobotModes()),
-    TEAM_NUMBER("--team-num", Type.INTEGER, MainJDEC.TEAM_NUMBER.getElement()),
-    USB_CONNECT("--usb", Type.BOOLEAN, MainJDEC.USB_CONNECT.getElement());
+    TEAM_NUMBER("--team-num", Type.INTEGER, MainJDEC.TEAM_NUMBER.getElement());
 
     private final String flag;
     private final Type type;
@@ -153,7 +152,7 @@ public enum Parameter {
     }
 
     private static Object[] getProtocolYears() {
-        Integer[] in = DisplayEndpoint.VALID_PROTOCOL_YEARS;
+        Integer[] in = DisplayEndpoint.UI_PROTOCOL_YEARS;
         String[] out = new String[in.length];
         for (int i = 0; i < in.length; i++) {
             out[i] = String.valueOf(in[i]);

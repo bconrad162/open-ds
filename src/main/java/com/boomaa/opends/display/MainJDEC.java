@@ -43,9 +43,8 @@ public interface MainJDEC {
     HOverlayField GAME_DATA = new HOverlayField("Game Data", 6);
     HOverlayField TEAM_NUMBER = new HOverlayField("Team Number", 6);
 
-    HComboBox<Integer> PROTOCOL_YEAR = new HComboBox<>(DisplayEndpoint.VALID_PROTOCOL_YEARS);
+    HComboBox<Integer> PROTOCOL_YEAR = new HComboBox<>(DisplayEndpoint.UI_PROTOCOL_YEARS);
     HCheckBox FMS_CONNECT = new HCheckBox("Connect FMS");
-    HCheckBox USB_CONNECT = new HCheckBox("Use USB");
     HButton RECONNECT_BTN = new HButton("↻");
 
     JoystickTab JS_TAB = new JoystickTab();
@@ -55,6 +54,7 @@ public interface MainJDEC {
 
     JLabel BAT_VOLTAGE = new JLabel("0.00 V");
     MultiValueLabel ROBOT_CONNECTION_STATUS = new MultiValueLabel(false, "Connected", "Simulated");
+    HideableLabel RIO_CONNECTION_PATH = new HideableLabel(false);
     HideableLabel FMS_CONNECTION_STATUS = new HideableLabel(false, "Connected");
     HideableLabel ESTOP_STATUS = new HideableLabel(false, "ESTOP");
     HideableLabel MATCH_TIME = new HideableLabel(false, "0");
@@ -64,13 +64,14 @@ public interface MainJDEC {
 
     static int getProtocolYear() {
         try {
-            return Integer.parseInt(String.valueOf(PROTOCOL_YEAR.getSelectedItem()));
+            int uiYear = Integer.parseInt(String.valueOf(PROTOCOL_YEAR.getSelectedItem()));
+            return DisplayEndpoint.resolveProtocolYear(uiYear);
         } catch (NullPointerException | NumberFormatException ignored) {
         }
         return DisplayEndpoint.VALID_PROTOCOL_YEARS[0];
     }
 
     static int getProtocolIndex() {
-        return PROTOCOL_YEAR.getSelectedIndex();
+        return DisplayEndpoint.getProtocolIndex(getProtocolYear());
     }
 }

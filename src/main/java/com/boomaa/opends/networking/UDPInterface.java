@@ -32,7 +32,7 @@ public class UDPInterface implements NetworkInterface {
     }
 
     public UDPInterface(String ip, int txPort, int rxPort) throws SocketException {
-        this(ip, txPort, rxPort, 2000);
+        this(ip, txPort, rxPort, 200);
     }
 
     @Override

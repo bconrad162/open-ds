@@ -31,6 +31,8 @@ import java.awt.event.ActionListener;
 import java.awt.event.ItemEvent;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
+import java.awt.event.WindowAdapter;
+import java.awt.event.WindowEvent;
 import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
@@ -68,7 +70,18 @@ public class MainFrame implements MainJDEC {
         layoutInit();
         listenerInit();
 
-        FRAME.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        FRAME.setDefaultCloseOperation(JFrame.DO_NOTHING_ON_CLOSE);
+        if (!FRAME.isHeadless()) {
+            FRAME.getElement().addWindowListener(new WindowAdapter() {
+                @Override
+                public void windowClosing(WindowEvent e) {
+                    Thread shutdownThread = new Thread(DisplayEndpoint::shutdown, "opends-shutdown");
+                    shutdownThread.setDaemon(true);
+                    shutdownThread.start();
+                    System.exit(0);
+                }
+            });
+        }
         FRAME.setResizable(true);
         if (OperatingSystem.isWindows()) {
             try {
@@ -116,10 +129,6 @@ public class MainFrame implements MainJDEC {
 
         IS_ENABLED.addItemListener((e) -> RSL_INDICATOR.setFlashing(e.getStateChange() == ItemEvent.SELECTED));
 
-        USB_CONNECT.addActionListener(makeAsyncListener((e) -> {
-            unsetAllInterfaces();
-            Debug.println("Connecting to robot over USB");
-        }));
         RESTART_CODE_BTN.init();
         RESTART_CODE_BTN.addActionListener((e) -> {
             IS_ENABLED.setSelected(false);
@@ -143,8 +152,6 @@ public class MainFrame implements MainJDEC {
                     ? "Robot Enabled" : "Robot Disabled"));
             FMS_CONNECT.addItemListener((e) -> Debug.println(e.getStateChange() == ItemEvent.SELECTED
                     ? "FMS connection allowed" : "FMS connection disallowed"));
-            USB_CONNECT.addItemListener((e) -> Debug.println(e.getStateChange() == ItemEvent.SELECTED
-                    ? "USB connection allowed" : "USB connection disallowed"));
             ROBOT_DRIVE_MODE.addItemListener((e) -> {
                 if (e.getStateChange() == ItemEvent.SELECTED) {
                     Debug.println("Drive mode changed to: " + ((RobotMode) e.getItem()).name());
@@ -218,7 +225,6 @@ public class MainFrame implements MainJDEC {
         base.clone().setPos(2, 3, 2, 1).build(RESTART_ROBO_RIO_BTN);
         base.clone().setPos(2, 4, 2, 1).build(ESTOP_BTN);
         base.clone().setPos(2, 5, 1, 1).build(FMS_CONNECT);
-        base.clone().setPos(3, 5, 1, 1).build(USB_CONNECT);
 
         endr.clone().setPos(2, 7, 1, 1).build(new JLabel("Reconnect: "));
         base.clone().setPos(3, 7, 1, 1).build(RECONNECT_BTN);
@@ -226,19 +232,22 @@ public class MainFrame implements MainJDEC {
         base.clone().setPos(4, 2, 2, 1).setFill(GridBagConstraints.NONE).build(BAT_VOLTAGE);
         endr.clone().setPos(4, 3, 1, 1).build(new JLabel("Robot:"));
         base.clone().setPos(5, 3, 1, 1).setAnchor(GridBagConstraints.LINE_START).build(ROBOT_CONNECTION_STATUS);
-        endr.clone().setPos(4, 4, 1, 1).build(new JLabel("Code: "));
-        base.clone().setPos(5, 4, 1, 1).setAnchor(GridBagConstraints.LINE_START).build(ROBOT_CODE_STATUS);
-        endr.clone().setPos(4, 5, 1, 1).build(new JLabel("EStop: "));
-        base.clone().setPos(5, 5, 1, 1).setAnchor(GridBagConstraints.LINE_START).build(ESTOP_STATUS);
-        endr.clone().setPos(4, 6, 1, 1).build(new JLabel("FMS: "));
-        base.clone().setPos(5, 6, 1, 1).setAnchor(GridBagConstraints.LINE_START).build(FMS_CONNECTION_STATUS);
-        endr.clone().setPos(4, 7, 1, 1).build(new JLabel("Time: "));
-        base.clone().setPos(5, 7, 1, 1).setAnchor(GridBagConstraints.LINE_START).build(MATCH_TIME);
+        endr.clone().setPos(4, 4, 1, 1).build(new JLabel("Link: "));
+        base.clone().setPos(5, 4, 1, 1).setAnchor(GridBagConstraints.LINE_START).build(RIO_CONNECTION_PATH);
+        endr.clone().setPos(4, 5, 1, 1).build(new JLabel("Code: "));
+        base.clone().setPos(5, 5, 1, 1).setAnchor(GridBagConstraints.LINE_START).build(ROBOT_CODE_STATUS);
+        endr.clone().setPos(4, 6, 1, 1).build(new JLabel("EStop: "));
+        base.clone().setPos(5, 6, 1, 1).setAnchor(GridBagConstraints.LINE_START).build(ESTOP_STATUS);
+        endr.clone().setPos(4, 7, 1, 1).build(new JLabel("FMS: "));
+        base.clone().setPos(5, 7, 1, 1).setAnchor(GridBagConstraints.LINE_START).build(FMS_CONNECTION_STATUS);
+        endr.clone().setPos(4, 8, 1, 1).build(new JLabel("Time: "));
+        base.clone().setPos(5, 8, 1, 1).setAnchor(GridBagConstraints.LINE_START).build(MATCH_TIME);
 
         Debug.println("Swing components initialized and ready for display");
     }
 
     private static void unsetAllInterfaces() {
+        com.boomaa.opends.networking.AddressConstants.forceClearConnectedRioAddress();
         DisplayEndpoint.RIO_UDP_CLOCK.restart();
         DisplayEndpoint.RIO_TCP_CLOCK.restart();
         DisplayEndpoint.FMS_UDP_CLOCK.restart();

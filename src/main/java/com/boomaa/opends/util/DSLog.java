@@ -5,6 +5,7 @@ import com.boomaa.opends.data.holders.Protocol;
 import com.boomaa.opends.data.holders.Remote;
 import com.boomaa.opends.data.send.PacketBuilder;
 import com.boomaa.opends.display.DisplayEndpoint;
+import com.boomaa.opends.display.Logger;
 import com.boomaa.opends.display.MainJDEC;
 import com.boomaa.opends.display.RobotMode;
 import com.boomaa.opends.display.frames.MessageBox;
@@ -126,8 +127,15 @@ public class DSLog extends Clock {
     }
 
     public static void queueEvent(String event, EventSeverity level) {
-        event = (level == EventSeverity.ERROR ? level.name() :
-                StringUtils.toTitleCase(level.name())) + " " + event;
+        queueEvent(event, level, true);
+    }
+
+    public static void queueEvent(String event, EventSeverity level, boolean logToUi) {
+        event = (level == EventSeverity.ERROR ? level.name()
+                : StringUtils.toTitleCase(level.name())) + " " + event;
+        if (logToUi) {
+            Logger.OUT.println("[DSLog] " + event);
+        }
         double currentTimeMs = System.currentTimeMillis();
         byte[] data = new PacketBuilder().pad(0, 4)
                 .addBytes(secondTimestamp(currentTimeMs))

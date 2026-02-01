@@ -16,6 +16,8 @@ import java.net.InetAddress;
 import java.net.UnknownHostException;
 
 public class NetworkClock extends Clock {
+    private static final int PING_TIMEOUT_MS = 200;
+    private static final long RIO_STALE_MS = 600;
     private NetworkInterface iface;
     private final Remote remote;
     private final Protocol protocol;
@@ -49,6 +51,9 @@ public class NetworkClock extends Clock {
                             Debug.println(remote + " " + protocol + " interface connected to " + iface.toString(), EventSeverity.INFO, true);
                             Debug.removeSticky(makeDebugStr("network error"));
                             Debug.removeSticky(makeDebugStr("invalid data"));
+                            if (remote == Remote.ROBO_RIO) {
+                                DisplayEndpoint.NET_IF_INIT.touchRio();
+                            }
                         }
                     }
                 } else {
@@ -65,6 +70,10 @@ public class NetworkClock extends Clock {
             Debug.removeSticky(makeDebugStr("updater or creator is null"));
         } else {
             Debug.println(makeDebugStr("updater or creator is null"), EventSeverity.ERROR, true);
+        }
+
+        if (remote == Remote.ROBO_RIO && DisplayEndpoint.NET_IF_INIT.isRioStale(RIO_STALE_MS)) {
+            uninitialize(false);
         }
     }
 
@@ -83,23 +92,41 @@ public class NetworkClock extends Clock {
             DisplayEndpoint.NET_IF_INIT.set(false, remote, protocol);
             return;
         }
+        String ip = isFms
+                ? AddressConstants.FMS_IP
+                : AddressConstants.getRioAddress();
+        PortTriple ports = isFms
+                ? AddressConstants.getFMSPorts()
+                : AddressConstants.getRioPorts();
         try {
-            String ip = isFms
-                    ? AddressConstants.FMS_IP
-                    : AddressConstants.getRioAddress();
             boolean reachable = exceptionPingTest(ip);
             if (!reachable) {
+                if (!isFms && protocol == Protocol.TCP) {
+                    com.boomaa.opends.display.Logger.OUT.println(
+                        "[DSLog] DS TCP not reachable at " + ip + ":" + ports.getTcp()
+                    );
+                }
                 uninitialize(isFms);
                 return;
             }
-            PortTriple ports = isFms
-                    ? AddressConstants.getFMSPorts()
-                    : AddressConstants.getRioPorts();
             iface = protocol == Protocol.TCP
                     ? new TCPInterface(ip, ports.getTcp())
                     : new UDPInterface(ip, ports.getUdpTx(), ports.getUdpRx());
             DisplayEndpoint.NET_IF_INIT.set(true, remote, protocol);
+            if (!isFms) {
+                AddressConstants.noteConnectedRioAddress(ip);
+                if (protocol == Protocol.TCP) {
+                    com.boomaa.opends.display.Logger.OUT.println(
+                        "[DSLog] DS TCP connected to " + ip + ":" + ports.getTcp()
+                    );
+                }
+            }
         } catch (IOException e) {
+            if (!isFms && protocol == Protocol.TCP) {
+                com.boomaa.opends.display.Logger.OUT.println(
+                    "[DSLog] DS TCP connect failed to " + ip + ":" + ports.getTcp() + " (" + e.getClass().getSimpleName() + ")"
+                );
+            }
             uninitialize(isFms);
         }
     }
@@ -113,6 +140,9 @@ public class NetworkClock extends Clock {
 
     private void uninitialize(boolean isFms) {
         DisplayEndpoint.NET_IF_INIT.set(false, remote, protocol);
+        if (!isFms) {
+            AddressConstants.clearConnectedRioAddressIfDisconnected();
+        }
         if (!isFms) {
             MainJDEC.IS_ENABLED.setEnabled(false);
             if (MainJDEC.IS_ENABLED.isSelected()) {
@@ -140,7 +170,7 @@ public class NetworkClock extends Clock {
 
     public static boolean exceptionPingTest(String ip) throws IOException {
         try {
-            return InetAddress.getByName(ip).isReachable(1000);
+            return InetAddress.getByName(ip).isReachable(PING_TIMEOUT_MS);
         } catch (UnknownHostException ignored) {
             throw new IOException("Unknown host " + ip);
         }

@@ -18,6 +18,12 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     linux-headers-amd64 \
     wget
 
+ARG MAVEN_VERSION=3.9.6
+RUN wget -q https://archive.apache.org/dist/maven/maven-3/${MAVEN_VERSION}/binaries/apache-maven-${MAVEN_VERSION}-bin.tar.gz \
+    && tar -xzf apache-maven-${MAVEN_VERSION}-bin.tar.gz -C /opt \
+    && ln -s /opt/apache-maven-${MAVEN_VERSION}/bin/mvn /usr/bin/mvn \
+    && rm apache-maven-${MAVEN_VERSION}-bin.tar.gz
+
 RUN wget https://musl.cc/aarch64-linux-musl-cross.tgz &&  \
     tar -xvzf aarch64-linux-musl-cross.tgz && \
     ln -s /aarch64-linux-musl-cross/bin/aarch64-linux-musl-gcc /usr/bin/aarch64-linux-musl-gcc

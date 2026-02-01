@@ -78,19 +78,13 @@ public enum MainHAction implements HeadlessJDEC {
             return OperationReturn.CONTINUE;
         }
     ),
-    TOGGLE_USB_CONNECTION("Toggle USB Connection",
-        () -> {
-            MainJDEC.USB_CONNECT.setSelected(true);
-            return OperationReturn.CONTINUE;
-        }
-    ),
     CHANGE_PROTOCOL_YEAR("Change Protocol Year",
         () -> {
             String response = HeadlessController.prompt("Enter new team number: ");
             try {
                 int year = Integer.parseInt(response);
                 boolean valid = false;
-                for (int validYear : DisplayEndpoint.VALID_PROTOCOL_YEARS) {
+                for (int validYear : DisplayEndpoint.UI_PROTOCOL_YEARS) {
                     if (year == validYear) {
                         valid = true;
                         break;

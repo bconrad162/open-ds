@@ -22,6 +22,7 @@ import com.boomaa.opends.util.InitChecker;
 import com.boomaa.opends.util.Libraries;
 import com.boomaa.opends.util.Parameter;
 import com.github.kwhat.jnativehook.GlobalScreen;
+import com.github.kwhat.jnativehook.NativeHookException;
 
 import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
@@ -38,6 +39,7 @@ public class DisplayEndpoint implements MainJDEC {
     public static NTConnection NETWORK_TABLES = new NTConnection();
     public static InitChecker NET_IF_INIT = new InitChecker();
     public static Integer[] VALID_PROTOCOL_YEARS = { 2025, 2024, 2023, 2022, 2021, 2020, 2016, 2015, 2014 };
+    public static Integer[] UI_PROTOCOL_YEARS = { 2026, 2025, 2024, 2023, 2022, 2021, 2020, 2016, 2015, 2014 };
 
     private static final ProtocolClass parserClass = new ProtocolClass("com.boomaa.opends.data.receive.parser.Parser");
     private static final ProtocolClass creatorClass = new ProtocolClass("com.boomaa.opends.data.send.creator.Creator");
@@ -115,6 +117,38 @@ public class DisplayEndpoint implements MainJDEC {
             MessageBox.show(ArrayUtils.printStackTrace(e, 10), MessageBox.Type.ERROR);
             System.exit(1);
         }
+    }
+
+    public static void shutdown() {
+        controlUpdater.end();
+        RIO_TCP_CLOCK.end();
+        RIO_UDP_CLOCK.end();
+        FMS_TCP_CLOCK.end();
+        FMS_UDP_CLOCK.end();
+        FILE_LOGGER.end();
+        NETWORK_TABLES.end();
+        if (!Parameter.DISABLE_HOTKEYS.isPresent()) {
+            try {
+                GlobalScreen.unregisterNativeHook();
+            } catch (NativeHookException ignored) {
+            }
+        }
+    }
+
+    public static int resolveProtocolYear(int uiYear) {
+        if (uiYear == 2026) {
+            return 2025;
+        }
+        return uiYear;
+    }
+
+    public static int getProtocolIndex(int protocolYear) {
+        for (int i = 0; i < VALID_PROTOCOL_YEARS.length; i++) {
+            if (VALID_PROTOCOL_YEARS[i] == protocolYear) {
+                return i;
+            }
+        }
+        return 0;
     }
 
     public static PacketParser getPacketParser(Remote remote, Protocol protocol, byte[] data) {
