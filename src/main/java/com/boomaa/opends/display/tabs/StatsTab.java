@@ -1,9 +1,14 @@
 package com.boomaa.opends.display.tabs;
 
 import com.boomaa.opends.data.StatsFields;
+import com.boomaa.opends.display.Theme;
 import com.boomaa.opends.display.elements.ColorCellRenderer;
 
 import java.awt.Dimension;
+import java.awt.GridBagConstraints;
+import java.awt.GridBagLayout;
+import java.awt.Insets;
+import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JTable;
 import javax.swing.table.DefaultTableModel;
@@ -20,6 +25,9 @@ public class StatsTab extends TabBase {
 
     @Override
     public void config() {
+        super.setLayout(new GridBagLayout());
+        super.setBackground(Theme.BG);
+
         StatsFields[] allFields = StatsFields.values();
         for (StatsFields field : allFields) {
             TABLE_MODEL.addRow(new Object[] { field.getSection(), field.getKey(), field.getValue() });
@@ -42,7 +50,21 @@ public class StatsTab extends TabBase {
         scroll.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_ALWAYS);
         scroll.setHorizontalScrollBarPolicy(JScrollPane.HORIZONTAL_SCROLLBAR_AS_NEEDED);
         scroll.setPreferredSize(super.dimension);
-        super.add(scroll);
+        JPanel card = Theme.cardPanel();
+        card.setLayout(new GridBagLayout());
+        GridBagConstraints gbc = new GridBagConstraints();
+        gbc.insets = new Insets(8, 8, 8, 8);
+        gbc.fill = GridBagConstraints.BOTH;
+        gbc.weightx = 1;
+        gbc.weighty = 1;
+        card.add(scroll, gbc);
+
+        GridBagConstraints root = new GridBagConstraints();
+        root.insets = new Insets(8, 8, 8, 8);
+        root.fill = GridBagConstraints.BOTH;
+        root.weightx = 1;
+        root.weighty = 1;
+        super.add(card, root);
 
         super.repaint();
         super.revalidate();

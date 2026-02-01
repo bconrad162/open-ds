@@ -8,6 +8,7 @@ import com.boomaa.opends.display.RobotMode;
 import com.boomaa.opends.display.StdRedirect;
 import com.boomaa.opends.display.TeamNumListener;
 import com.boomaa.opends.display.TeamNumPersist;
+import com.boomaa.opends.display.Theme;
 import com.boomaa.opends.display.elements.GBCPanelBuilder;
 import com.boomaa.opends.display.tabs.TabChangeListener;
 import com.boomaa.opends.util.Debug;
@@ -40,10 +41,10 @@ import java.util.function.Consumer;
 import javax.swing.ImageIcon;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
+import javax.swing.JPanel;
 import javax.swing.SwingUtilities;
 import javax.swing.SwingWorker;
 import javax.swing.UIManager;
-import javax.swing.UnsupportedLookAndFeelException;
 
 public class MainFrame implements MainJDEC {
     public static final Image ICON = Toolkit.getDefaultToolkit()
@@ -60,9 +61,13 @@ public class MainFrame implements MainJDEC {
     }
 
     public static void display() {
+        if (!FRAME.isHeadless()) {
+            Theme.apply();
+        }
         FRAME.setIconImage(MainFrame.ICON);
         if (!FRAME.isHeadless()) {
             FRAME.getContentPane().setLayout(new GridBagLayout());
+            FRAME.getContentPane().setBackground(Theme.BG);
         }
         TITLE.setText(TITLE.getText() + " " + DisplayEndpoint.CURRENT_VERSION_TAG);
 
@@ -83,13 +88,6 @@ public class MainFrame implements MainJDEC {
             });
         }
         FRAME.setResizable(true);
-        if (OperatingSystem.isWindows()) {
-            try {
-                UIManager.setLookAndFeel("com.sun.java.swing.plaf.windows.WindowsLookAndFeel");
-            } catch (ClassNotFoundException | InstantiationException | IllegalAccessException | UnsupportedLookAndFeelException e) {
-                e.printStackTrace();
-            }
-        }
         if (!FRAME.isHeadless()) {
             SwingUtilities.updateComponentTreeUI(FRAME.getElement());
         }
@@ -128,6 +126,9 @@ public class MainFrame implements MainJDEC {
         TAB.addChangeListener(TabChangeListener.getInstance());
 
         IS_ENABLED.addItemListener((e) -> RSL_INDICATOR.setFlashing(e.getStateChange() == ItemEvent.SELECTED));
+        IS_ENABLED.addItemListener((e) -> Theme.styleToggleButton(IS_ENABLED.getElement(),
+                e.getStateChange() == ItemEvent.SELECTED));
+        DISABLE_BTN.addActionListener((e) -> IS_ENABLED.setSelected(false));
 
         RESTART_CODE_BTN.init();
         RESTART_CODE_BTN.addActionListener((e) -> {
@@ -189,6 +190,13 @@ public class MainFrame implements MainJDEC {
         UIManager.getDefaults().put("TabbedPane.contentBorderInsets", new Insets(0, 0, 0, 0));
         UIManager.getDefaults().put("TabbedPane.tabsOverlapBorder", true);
 
+        TAB_CONTAINER.setBackground(Theme.BG);
+        JS_TAB.setBackground(Theme.CARD);
+        NT_TAB.setBackground(Theme.CARD);
+        STATS_TAB.setBackground(Theme.CARD);
+        LOG_TAB.setBackground(Theme.CARD);
+        TAB.setBackground(Theme.BG);
+
         TAB.addTab("Control", TAB_CONTAINER);
         TAB.addTab("Joysticks", JS_TAB);
         TAB.addTab("Shuffleboard", NT_TAB);
@@ -197,51 +205,102 @@ public class MainFrame implements MainJDEC {
         FRAME.add(TAB);
         Debug.println("Swing tabs added to frame");
 
-        Dimension dimension = new Dimension(560, 350);
+        Dimension dimension = new Dimension(820, 560);
         FrameBase.applyNonWindowsScaling(dimension);
         FRAME.setPreferredSize(dimension);
 
-        GBCPanelBuilder endr = base.clone().setAnchor(GridBagConstraints.LINE_END).setFill(GridBagConstraints.NONE);
+        Theme.styleGhostButton(RESTART_CODE_BTN.getElement());
+        Theme.styleGhostButton(RESTART_ROBO_RIO_BTN.getElement());
+        Theme.styleDangerButton(ESTOP_BTN.getElement());
+        Theme.styleGhostButton(RECONNECT_BTN.getElement());
+        Theme.styleGhostButton(DISABLE_BTN.getElement());
+        Theme.styleToggleButton(IS_ENABLED.getElement(), IS_ENABLED.isSelected());
 
-        base.clone().setPos(0, 0, 6, 1).setFill(GridBagConstraints.NONE).build(TITLE);
-        base.clone().setPos(0, 1, 6, 1).setFill(GridBagConstraints.NONE).build(LINK);
-        base.clone().setPos(5, 0, 1, 2).setFill(GridBagConstraints.NONE).build(new JLabel(new ImageIcon(MainFrame.ICON_MIN)));
+        JPanel headerCard = Theme.cardPanel();
+        JPanel controlCard = Theme.cardPanel();
+        JPanel actionCard = Theme.cardPanel();
+        JPanel statusCard = Theme.cardPanel();
 
-        base.clone().setPos(0, 2, 1, 1).build(IS_ENABLED);
-        base.clone().setPos(0, 0, 1, 2).build(RSL_INDICATOR);
-        base.clone().setPos(1, 2, 1, 1).build(ROBOT_DRIVE_MODE);
+        GridBagConstraints root = new GridBagConstraints();
+        root.insets = new Insets(8, 8, 8, 8);
+        root.fill = GridBagConstraints.BOTH;
+        root.weightx = 1;
 
-        base.clone().setPos(0, 3, 2, 1).setFill(GridBagConstraints.NONE).build(new JLabel("Alliance Station"));
-        base.clone().setPos(0, 4, 1, 1).build(ALLIANCE_NUM);
-        base.clone().setPos(1, 4, 1, 1).build(ALLIANCE_COLOR);
-        endr.clone().setPos(0, 5, 1, 1).build(new JLabel("Team Number:"));
-        base.clone().setPos(1, 5, 1, 1).setAnchor(GridBagConstraints.LINE_START).build(TEAM_NUMBER);
-        endr.clone().setPos(0, 6, 1, 1).build(new JLabel("Game Data:"));
-        base.clone().setPos(1, 6, 1, 1).setAnchor(GridBagConstraints.LINE_START).build(GAME_DATA);
-        endr.clone().setPos(2, 6, 1, 1).build(new JLabel("Protocol Year:"));
-        base.clone().setPos(3, 6, 1, 1).setAnchor(GridBagConstraints.LINE_START).build(PROTOCOL_YEAR);
+        root.gridx = 0;
+        root.gridy = 0;
+        root.gridwidth = 3;
+        TAB_CONTAINER.add(headerCard, root);
 
-        base.clone().setPos(2, 2, 2, 1).build(RESTART_CODE_BTN);
-        base.clone().setPos(2, 3, 2, 1).build(RESTART_ROBO_RIO_BTN);
-        base.clone().setPos(2, 4, 2, 1).build(ESTOP_BTN);
-        base.clone().setPos(2, 5, 1, 1).build(FMS_CONNECT);
+        root.gridy = 1;
+        root.gridwidth = 2;
+        root.weightx = 0.7;
+        TAB_CONTAINER.add(controlCard, root);
 
-        endr.clone().setPos(2, 7, 1, 1).build(new JLabel("Reconnect: "));
-        base.clone().setPos(3, 7, 1, 1).build(RECONNECT_BTN);
+        root.gridx = 2;
+        root.weightx = 0.3;
+        TAB_CONTAINER.add(statusCard, root);
 
-        base.clone().setPos(4, 2, 2, 1).setFill(GridBagConstraints.NONE).build(BAT_VOLTAGE);
-        endr.clone().setPos(4, 3, 1, 1).build(new JLabel("Robot:"));
-        base.clone().setPos(5, 3, 1, 1).setAnchor(GridBagConstraints.LINE_START).build(ROBOT_CONNECTION_STATUS);
-        endr.clone().setPos(4, 4, 1, 1).build(new JLabel("Link: "));
-        base.clone().setPos(5, 4, 1, 1).setAnchor(GridBagConstraints.LINE_START).build(RIO_CONNECTION_PATH);
-        endr.clone().setPos(4, 5, 1, 1).build(new JLabel("Code: "));
-        base.clone().setPos(5, 5, 1, 1).setAnchor(GridBagConstraints.LINE_START).build(ROBOT_CODE_STATUS);
-        endr.clone().setPos(4, 6, 1, 1).build(new JLabel("EStop: "));
-        base.clone().setPos(5, 6, 1, 1).setAnchor(GridBagConstraints.LINE_START).build(ESTOP_STATUS);
-        endr.clone().setPos(4, 7, 1, 1).build(new JLabel("FMS: "));
-        base.clone().setPos(5, 7, 1, 1).setAnchor(GridBagConstraints.LINE_START).build(FMS_CONNECTION_STATUS);
-        endr.clone().setPos(4, 8, 1, 1).build(new JLabel("Time: "));
-        base.clone().setPos(5, 8, 1, 1).setAnchor(GridBagConstraints.LINE_START).build(MATCH_TIME);
+        root.gridx = 0;
+        root.gridy = 2;
+        root.gridwidth = 3;
+        root.weightx = 1;
+        TAB_CONTAINER.add(actionCard, root);
+
+        GBCPanelBuilder header = new GBCPanelBuilder(headerCard)
+                .setInsets(new Insets(4, 4, 4, 4))
+                .setFill(GridBagConstraints.NONE)
+                .setAnchor(GridBagConstraints.LINE_START);
+        header.clone().setPos(0, 0, 1, 1).build(TITLE);
+        header.clone().setPos(0, 1, 1, 1).build(LINK);
+        header.clone().setPos(1, 0, 1, 2).setAnchor(GridBagConstraints.LINE_END)
+                .build(new JLabel(new ImageIcon(MainFrame.ICON_MIN)));
+
+        GBCPanelBuilder control = new GBCPanelBuilder(controlCard)
+                .setInsets(new Insets(6, 6, 6, 6))
+                .setFill(GridBagConstraints.HORIZONTAL)
+                .setAnchor(GridBagConstraints.LINE_START);
+        control.clone().setPos(0, 0, 1, 1).setFill(GridBagConstraints.NONE).build(RSL_INDICATOR);
+        control.clone().setPos(1, 0, 1, 1).setFill(GridBagConstraints.NONE).build(IS_ENABLED);
+        control.clone().setPos(2, 0, 1, 1).setFill(GridBagConstraints.NONE).build(DISABLE_BTN);
+        control.clone().setPos(3, 0, 1, 1).setFill(GridBagConstraints.NONE).build(ROBOT_DRIVE_MODE);
+        control.clone().setPos(0, 1, 2, 1).setFill(GridBagConstraints.NONE).build(new JLabel("Alliance Station"));
+        control.clone().setPos(0, 2, 1, 1).build(ALLIANCE_NUM);
+        control.clone().setPos(1, 2, 1, 1).build(ALLIANCE_COLOR);
+        control.clone().setPos(0, 3, 1, 1).setFill(GridBagConstraints.NONE).build(new JLabel("Team Number"));
+        control.clone().setPos(1, 3, 1, 1).build(TEAM_NUMBER);
+        control.clone().setPos(0, 4, 1, 1).setFill(GridBagConstraints.NONE).build(new JLabel("Game Data"));
+        control.clone().setPos(1, 4, 1, 1).build(GAME_DATA);
+        control.clone().setPos(0, 5, 1, 1).setFill(GridBagConstraints.NONE).build(new JLabel("Protocol Year"));
+        control.clone().setPos(1, 5, 1, 1).build(PROTOCOL_YEAR);
+        control.clone().setPos(2, 5, 1, 1).setFill(GridBagConstraints.NONE).build(new JLabel("Reconnect"));
+        control.clone().setPos(2, 6, 1, 1).setFill(GridBagConstraints.NONE).build(RECONNECT_BTN);
+
+        GBCPanelBuilder actions = new GBCPanelBuilder(actionCard)
+                .setInsets(new Insets(6, 6, 6, 6))
+                .setFill(GridBagConstraints.HORIZONTAL)
+                .setAnchor(GridBagConstraints.LINE_START);
+        actions.clone().setPos(0, 0, 1, 1).build(RESTART_CODE_BTN);
+        actions.clone().setPos(1, 0, 1, 1).build(RESTART_ROBO_RIO_BTN);
+        actions.clone().setPos(2, 0, 1, 1).build(ESTOP_BTN);
+        actions.clone().setPos(3, 0, 1, 1).build(FMS_CONNECT);
+
+        GBCPanelBuilder status = new GBCPanelBuilder(statusCard)
+                .setInsets(new Insets(6, 6, 6, 6))
+                .setFill(GridBagConstraints.NONE)
+                .setAnchor(GridBagConstraints.LINE_START);
+        status.clone().setPos(0, 0, 1, 1).build(BAT_VOLTAGE);
+        status.clone().setPos(0, 1, 1, 1).build(new JLabel("Robot"));
+        status.clone().setPos(1, 1, 1, 1).build(ROBOT_CONNECTION_STATUS);
+        status.clone().setPos(0, 2, 1, 1).build(new JLabel("Link"));
+        status.clone().setPos(1, 2, 1, 1).build(RIO_CONNECTION_PATH);
+        status.clone().setPos(0, 3, 1, 1).build(new JLabel("Code"));
+        status.clone().setPos(1, 3, 1, 1).build(ROBOT_CODE_STATUS);
+        status.clone().setPos(0, 4, 1, 1).build(new JLabel("EStop"));
+        status.clone().setPos(1, 4, 1, 1).build(ESTOP_STATUS);
+        status.clone().setPos(0, 5, 1, 1).build(new JLabel("FMS"));
+        status.clone().setPos(1, 5, 1, 1).build(FMS_CONNECTION_STATUS);
+        status.clone().setPos(0, 6, 1, 1).build(new JLabel("Time"));
+        status.clone().setPos(1, 6, 1, 1).build(MATCH_TIME);
 
         Debug.println("Swing components initialized and ready for display");
     }

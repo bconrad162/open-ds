@@ -1,5 +1,6 @@
 package com.boomaa.opends.display.frames;
 
+import com.boomaa.opends.display.Theme;
 import com.boomaa.opends.util.Debug;
 import com.boomaa.opends.util.OperatingSystem;
 
@@ -46,6 +47,7 @@ public abstract class FrameBase extends JFrame {
         this.setLocationRelativeTo(null);
         this.setResizable(true);
         this.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
+        this.getContentPane().setBackground(Theme.BG);
     }
 
     public void postConfig() {

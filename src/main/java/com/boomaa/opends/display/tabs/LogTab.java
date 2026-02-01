@@ -1,6 +1,7 @@
 package com.boomaa.opends.display.tabs;
 
 import com.boomaa.opends.display.Logger;
+import com.boomaa.opends.display.Theme;
 import com.boomaa.opends.display.frames.FrameBase;
 import com.boomaa.opends.display.frames.LogWindow;
 import com.boomaa.opends.util.LogFilter;
@@ -11,6 +12,7 @@ import java.awt.GridBagLayout;
 import java.awt.Insets;
 import javax.swing.JButton;
 import javax.swing.JCheckBox;
+import javax.swing.JPanel;
 
 public class LogTab extends TabBase {
     public LogTab() {
@@ -21,6 +23,17 @@ public class LogTab extends TabBase {
     @Override
     public void config() {
         super.setLayout(new GridBagLayout());
+        super.setBackground(Theme.BG);
+
+        JPanel card = Theme.cardPanel();
+        GridBagConstraints root = new GridBagConstraints();
+        root.insets = new Insets(8, 8, 8, 8);
+        root.fill = GridBagConstraints.BOTH;
+        root.weightx = 1;
+        root.weighty = 1;
+        super.add(card, root);
+
+        card.setLayout(new GridBagLayout());
         GridBagConstraints gbc = new GridBagConstraints();
         gbc.insets = new Insets(5, 5, 5, 5);
         gbc.fill = GridBagConstraints.NONE;
@@ -28,6 +41,7 @@ public class LogTab extends TabBase {
         gbc.gridx = 0;
         gbc.gridy = 0;
         JButton openWindow = new JButton("Open Log Window");
+        Theme.styleGhostButton(openWindow);
         openWindow.addActionListener(e -> {
             if (!FrameBase.isAlive(LogWindow.class)) {
                 new LogWindow();
@@ -35,7 +49,7 @@ public class LogTab extends TabBase {
                 FrameBase.getAlive(LogWindow.class).forceShow();
             }
         });
-        super.add(openWindow, gbc);
+        card.add(openWindow, gbc);
 
         JCheckBox info = new JCheckBox("Info", LogFilter.isInfoEnabled());
         JCheckBox warn = new JCheckBox("Warning", LogFilter.isWarningEnabled());
@@ -45,11 +59,11 @@ public class LogTab extends TabBase {
         err.addActionListener(e -> LogFilter.setErrorEnabled(err.isSelected()));
 
         gbc.gridx = 1;
-        super.add(info, gbc);
+        card.add(info, gbc);
         gbc.gridx = 2;
-        super.add(warn, gbc);
+        card.add(warn, gbc);
         gbc.gridx = 3;
-        super.add(err, gbc);
+        card.add(err, gbc);
 
         gbc.gridy = 1;
         gbc.gridx = 0;
@@ -57,6 +71,6 @@ public class LogTab extends TabBase {
         gbc.fill = GridBagConstraints.BOTH;
         gbc.weightx = 1;
         gbc.weighty = 1;
-        super.add(Logger.PANE, gbc);
+        card.add(Logger.PANE, gbc);
     }
 }

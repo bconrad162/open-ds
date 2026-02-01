@@ -31,6 +31,7 @@ public class Logger extends OutputStream {
             }
         });
         textArea.setEditable(false);
+        Theme.styleLogArea(textArea);
 
         LOGGER = new Logger(textArea);
         OUT = new PrintStream(LOGGER);
@@ -51,6 +52,7 @@ public class Logger extends OutputStream {
         JTextArea textArea = new JTextArea(15, 45);
         textArea.setMargin(new Insets(2, 6, 2, 2));
         textArea.setEditable(false);
+        Theme.styleLogArea(textArea);
         Appender app = LOGGER.appender;
         if (app != null) {
             app.addSink(textArea);

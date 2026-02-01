@@ -1,12 +1,12 @@
 package com.boomaa.opends.display.tabs;
 
 import com.boomaa.opends.display.elements.GBCPanelBuilder;
+import com.boomaa.opends.display.Theme;
 import com.boomaa.opends.networktables.NTEntry;
 import com.boomaa.opends.networktables.NTStorage;
 import com.boomaa.opends.util.Debug;
 
 import java.awt.BorderLayout;
-import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.Font;
 import java.awt.Graphics;
@@ -46,12 +46,25 @@ public class NTTab extends TabBase {
     @Override
     public void config() {
         super.setLayout(new GridBagLayout());
-        this.base = new GBCPanelBuilder(this).setFill(GridBagConstraints.BOTH).setAnchor(GridBagConstraints.CENTER).setInsets(stdInsets);
+        super.setBackground(Theme.BG);
+
+        JPanel card = Theme.cardPanel();
+        GridBagConstraints root = new GridBagConstraints();
+        root.insets = stdInsets;
+        root.fill = GridBagConstraints.BOTH;
+        root.weightx = 1;
+        root.weighty = 1;
+        super.add(card, root);
+
+        card.setLayout(new GridBagLayout());
+        this.base = new GBCPanelBuilder(card).setFill(GridBagConstraints.BOTH).setAnchor(GridBagConstraints.CENTER).setInsets(stdInsets);
         this.entryDisplayWrapper = new JScrollPane(JScrollPane.VERTICAL_SCROLLBAR_ALWAYS, JScrollPane.HORIZONTAL_SCROLLBAR_AS_NEEDED);
 
         int lineHeight = 30;
         BasicArrowButton leftMenubar = new BasicArrowButton(SwingConstants.WEST);
         BasicArrowButton rightMenubar = new BasicArrowButton(SwingConstants.EAST);
+        Theme.styleGhostButton(leftMenubar);
+        Theme.styleGhostButton(rightMenubar);
         leftMenubar.addActionListener((e) -> {
             tabStartIndex = Math.max(0, tabStartIndex - 1);
             populateTabsBar();
@@ -68,9 +81,11 @@ public class NTTab extends TabBase {
         base.clone().setPos(7, 0, 1, 1).setFill(GridBagConstraints.NONE).build(rightMenubar);
 
         tabsPanel = new JPanel();
+        tabsPanel.setBackground(Theme.CARD);
         tabsPanel.setPreferredSize(new Dimension(440, lineHeight));
         tabsPanel.setLayout(new GridBagLayout());
         entryDisplay = new JPanel();
+        entryDisplay.setBackground(Theme.CARD);
         entryDisplay.setLayout(new GridBagLayout());
 
         displayedEntries = new HashMap<>();
@@ -97,22 +112,25 @@ public class NTTab extends TabBase {
                             Graphics2D graphics = (Graphics2D) g;
                             graphics.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
 
-                            graphics.setColor(Color.LIGHT_GRAY);
+                            graphics.setColor(Theme.SURFACE);
                             graphics.fillRoundRect(0, 0, getWidth() - 1, getHeight() - 1, borderRadius, borderRadius);
-                            graphics.setColor(Color.GRAY);
+                            graphics.setColor(Theme.BORDER);
                             graphics.drawRoundRect(0, 0, getWidth() - 1, getHeight() - 1, borderRadius, borderRadius);
                         }
                     };
                     tempPanel.setLayout(new BorderLayout());
+                    tempPanel.setBackground(Theme.SURFACE);
                     JLabel key = new JLabel(entry.getKey(), SwingConstants.CENTER);
                     Font f = key.getFont();
                     key.setFont(f.deriveFont(f.getStyle() | Font.BOLD));
+                    key.setForeground(Theme.TEXT);
                     String entryValue = entryValueToString(entry.getValue());
                     Class<?> entryValueClazz = entry.getValue().getClass();
                     if (entryValueClazz.isArray() && entryValueClazz.getComponentType().isPrimitive()) {
                         entryValue = "<html>" + entryValue.replaceAll(" ", "<br>") + "</html>";
                     }
                     JLabel value = new JLabel(entryValue, SwingConstants.CENTER);
+                    value.setForeground(Theme.MUTED);
                     tempPanel.add(key, BorderLayout.NORTH);
                     tempPanel.add(value, BorderLayout.SOUTH);
                     tempPanel.setBorder(emptyBorder);
@@ -141,6 +159,7 @@ public class NTTab extends TabBase {
         GBCPanelBuilder gbc = new GBCPanelBuilder(tabsPanel).setInsets(stdInsets);
         for (int i = tabStartIndex; i < tabWidth + tabStartIndex; i++) {
             JButton tabBtn = new JButton(i < NTStorage.TABS.size() ? truncate(NTStorage.TABS.get(i), 18, true) : "");
+            Theme.styleGhostButton(tabBtn);
             tabBtn.addActionListener((e) -> populateTab(tabBtn.getText()));
             tabBtn.setVisible(i < NTStorage.TABS.size());
             gbc.clone().setPos(i - tabStartIndex, 0, 1, 1).build(tabBtn);

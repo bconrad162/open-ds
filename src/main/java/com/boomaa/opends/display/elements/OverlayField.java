@@ -1,6 +1,7 @@
 package com.boomaa.opends.display.elements;
 
-import java.awt.Color;
+import com.boomaa.opends.display.Theme;
+
 import java.awt.event.FocusEvent;
 import java.awt.event.FocusListener;
 import javax.swing.JTextField;
@@ -11,7 +12,7 @@ public class OverlayField extends JTextField implements FocusListener {
 
     public OverlayField(final String hint, final int col) {
         super(hint, col);
-        super.setForeground(Color.GRAY);
+        super.setForeground(Theme.MUTED);
         this.hint = hint;
         this.showingHint = true;
         super.addFocusListener(this);
@@ -26,7 +27,7 @@ public class OverlayField extends JTextField implements FocusListener {
 
     @Override
     public void focusGained(FocusEvent e) {
-        super.setForeground(Color.BLACK);
+        super.setForeground(Theme.TEXT);
         if (this.getText().isEmpty()) {
             super.setText("");
             showingHint = false;
@@ -36,7 +37,7 @@ public class OverlayField extends JTextField implements FocusListener {
     @Override
     public void focusLost(FocusEvent e) {
         if (this.getText().isEmpty()) {
-            super.setForeground(Color.GRAY);
+            super.setForeground(Theme.MUTED);
             super.setText(hint);
             showingHint = true;
         }

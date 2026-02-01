@@ -1,6 +1,7 @@
 package com.boomaa.opends.display.tabs;
 
 import com.boomaa.opends.display.MainJDEC;
+import com.boomaa.opends.display.Theme;
 import com.boomaa.opends.display.elements.GBCPanelBuilder;
 import com.boomaa.opends.display.elements.HideableLabel;
 import com.boomaa.opends.display.frames.AutoOrderFrame;
@@ -43,8 +44,17 @@ public class JoystickTab extends TabBase {
 
     @Override
     public void config() {
+        super.setBackground(Theme.BG);
         EmbeddedJDEC.DISABLE_BTN.setVerticalTextPosition(SwingConstants.TOP);
         EmbeddedJDEC.DISABLE_BTN.setHorizontalTextPosition(SwingConstants.CENTER);
+        EmbeddedJDEC.DISABLE_BTN.setBackground(Theme.CARD);
+        EmbeddedJDEC.DISABLE_BTN.setForeground(Theme.TEXT);
+
+        Theme.styleGhostButton(EmbeddedJDEC.RELOAD_BTN);
+        Theme.styleGhostButton(EmbeddedJDEC.AUTO_ORDER_BTN);
+        Theme.styleGhostButton(EmbeddedJDEC.REASSIGN_AXES_BTN);
+        Theme.styleGhostButton(EmbeddedJDEC.UP_BTN);
+        Theme.styleGhostButton(EmbeddedJDEC.DOWN_BTN);
 
         EmbeddedJDEC.LIST.setVisibleRowCount(-1);
         EmbeddedJDEC.LIST.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
@@ -52,6 +62,9 @@ public class JoystickTab extends TabBase {
         EmbeddedJDEC.LIST_SCR.setHorizontalScrollBarPolicy(JScrollPane.HORIZONTAL_SCROLLBAR_AS_NEEDED);
         EmbeddedJDEC.LIST_SCR.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED);
         EmbeddedJDEC.LIST_SCR.setPreferredSize(new Dimension(260, 120));
+        EmbeddedJDEC.LIST.setBackground(Theme.SURFACE);
+        EmbeddedJDEC.LIST.setForeground(Theme.TEXT);
+        EmbeddedJDEC.BUTTON_GRID.setBackground(Theme.SURFACE);
 
         for (HIDDevice hid : ControlDevices.getAll().values()) {
             EmbeddedJDEC.LIST_MODEL.add(EmbeddedJDEC.LIST_MODEL.size(), hid);
@@ -90,6 +103,8 @@ public class JoystickTab extends TabBase {
                     JCheckBox cb = new JCheckBox();
                     cb.setEnabled(false);
                     cb.setSelected(buttons[i]);
+                    cb.setBackground(Theme.SURFACE);
+                    cb.setForeground(Theme.TEXT);
                     EmbeddedJDEC.BUTTONS.add(i, cb);
                     if (i != 0 && i % BTN_PER_ROW == 0) {
                         row += 2;
@@ -146,48 +161,80 @@ public class JoystickTab extends TabBase {
         });
 
         super.setLayout(new GridBagLayout());
-        GBCPanelBuilder base = new GBCPanelBuilder(this)
+
+        JPanel listCard = Theme.cardPanel();
+        JPanel axisCard = Theme.cardPanel();
+        JPanel buttonCard = Theme.cardPanel();
+
+        GridBagConstraints root = new GridBagConstraints();
+        root.insets = new Insets(8, 8, 8, 8);
+        root.fill = GridBagConstraints.BOTH;
+        root.weightx = 1;
+        root.weighty = 1;
+
+        root.gridx = 0;
+        root.gridy = 0;
+        root.weightx = 0.7;
+        super.add(listCard, root);
+
+        root.gridx = 1;
+        root.weightx = 0.3;
+        super.add(axisCard, root);
+
+        root.gridx = 0;
+        root.gridy = 1;
+        root.gridwidth = 2;
+        root.weightx = 1;
+        root.weighty = 0.6;
+        super.add(buttonCard, root);
+
+        GBCPanelBuilder list = new GBCPanelBuilder(listCard)
             .setFill(GridBagConstraints.BOTH)
             .setAnchor(GridBagConstraints.CENTER)
-            .setInsets(new Insets(5, 5, 5, 5));
-        GBCPanelBuilder end = base.clone()
-            .setFill(GridBagConstraints.NONE)
-            .setAnchor(GridBagConstraints.LINE_END);
+            .setInsets(new Insets(6, 6, 6, 6));
 
-        base.clone().setPos(0, 0, 1, 1).setFill(GridBagConstraints.NONE).build(new JLabel("Index"));
-        base.clone().setPos(0, 1, 1, 1)
+        list.clone().setPos(0, 0, 1, 1).setFill(GridBagConstraints.NONE).build(new JLabel("USB Index"));
+        list.clone().setPos(0, 1, 1, 1)
             .setFill(GridBagConstraints.HORIZONTAL)
             .setWeightX(0.2)
             .build(EmbeddedJDEC.INDEX_SET);
 
-        base.clone().setPos(1, 0, 2, 3)
+        list.clone().setPos(1, 0, 2, 3)
             .setWeightX(1)
             .setWeightY(1)
             .build(EmbeddedJDEC.LIST_SCR);
 
-        base.clone().setPos(3, 0, 1, 1).setAnchor(GridBagConstraints.LINE_START).build(EmbeddedJDEC.UP_BTN);
-        base.clone().setPos(3, 1, 1, 1).setAnchor(GridBagConstraints.LINE_START).build(EmbeddedJDEC.DOWN_BTN);
-        base.clone().setPos(3, 2, 1, 1).setAnchor(GridBagConstraints.LINE_START).build(EmbeddedJDEC.DISABLE_BTN);
+        list.clone().setPos(3, 0, 1, 1).setAnchor(GridBagConstraints.LINE_START).build(EmbeddedJDEC.UP_BTN);
+        list.clone().setPos(3, 1, 1, 1).setAnchor(GridBagConstraints.LINE_START).build(EmbeddedJDEC.DOWN_BTN);
+        list.clone().setPos(3, 2, 1, 1).setAnchor(GridBagConstraints.LINE_START).build(EmbeddedJDEC.DISABLE_BTN);
 
-        base.clone().setPos(4, 0, 1, 1).build(EmbeddedJDEC.RELOAD_BTN);
-        base.clone().setPos(4, 1, 1, 1).build(EmbeddedJDEC.AUTO_ORDER_BTN);
-        base.clone().setPos(4, 2, 1, 1).build(EmbeddedJDEC.REASSIGN_AXES_BTN);
+        list.clone().setPos(4, 0, 1, 1).build(EmbeddedJDEC.RELOAD_BTN);
+        list.clone().setPos(4, 1, 1, 1).build(EmbeddedJDEC.AUTO_ORDER_BTN);
+        list.clone().setPos(4, 2, 1, 1).build(EmbeddedJDEC.REASSIGN_AXES_BTN);
 
-        end.clone().setPos(5, 0, 1, 1).build(new JLabel("X: "));
-        end.clone().setPos(5, 1, 1, 1).build(new JLabel("Y: "));
-        end.clone().setPos(5, 2, 1, 1).build(new JLabel("Z: "));
-        end.clone().setPos(7, 0, 1, 1).build(new JLabel("RX: "));
-        end.clone().setPos(7, 1, 1, 1).build(new JLabel("RY: "));
-        end.clone().setPos(7, 2, 1, 1).build(new JLabel("RZ: "));
+        GBCPanelBuilder axis = new GBCPanelBuilder(axisCard)
+            .setFill(GridBagConstraints.NONE)
+            .setAnchor(GridBagConstraints.LINE_START)
+            .setInsets(new Insets(6, 6, 6, 6));
 
-        base.clone().setPos(6, 0, 1, 1).setAnchor(GridBagConstraints.LINE_START).build(EmbeddedJDEC.VAL_X);
-        base.clone().setPos(6, 1, 1, 1).setAnchor(GridBagConstraints.LINE_START).build(EmbeddedJDEC.VAL_Y);
-        base.clone().setPos(6, 2, 1, 1).setAnchor(GridBagConstraints.LINE_START).build(EmbeddedJDEC.VAL_Z);
-        base.clone().setPos(8, 0, 1, 1).setAnchor(GridBagConstraints.LINE_START).build(EmbeddedJDEC.VAL_RX);
-        base.clone().setPos(8, 1, 1, 1).setAnchor(GridBagConstraints.LINE_START).build(EmbeddedJDEC.VAL_RY);
-        base.clone().setPos(8, 2, 1, 1).setAnchor(GridBagConstraints.LINE_START).build(EmbeddedJDEC.VAL_RZ);
+        axis.clone().setPos(0, 0, 1, 1).build(new JLabel("X"));
+        axis.clone().setPos(1, 0, 1, 1).build(EmbeddedJDEC.VAL_X);
+        axis.clone().setPos(0, 1, 1, 1).build(new JLabel("Y"));
+        axis.clone().setPos(1, 1, 1, 1).build(EmbeddedJDEC.VAL_Y);
+        axis.clone().setPos(0, 2, 1, 1).build(new JLabel("Z"));
+        axis.clone().setPos(1, 2, 1, 1).build(EmbeddedJDEC.VAL_Z);
+        axis.clone().setPos(0, 3, 1, 1).build(new JLabel("RX"));
+        axis.clone().setPos(1, 3, 1, 1).build(EmbeddedJDEC.VAL_RX);
+        axis.clone().setPos(0, 4, 1, 1).build(new JLabel("RY"));
+        axis.clone().setPos(1, 4, 1, 1).build(EmbeddedJDEC.VAL_RY);
+        axis.clone().setPos(0, 5, 1, 1).build(new JLabel("RZ"));
+        axis.clone().setPos(1, 5, 1, 1).build(EmbeddedJDEC.VAL_RZ);
 
-        base.clone().setPos(2, 3, 6, 2).setAnchor(GridBagConstraints.LINE_START).build(EmbeddedJDEC.BUTTON_GRID);
+        GBCPanelBuilder buttons = new GBCPanelBuilder(buttonCard)
+            .setFill(GridBagConstraints.BOTH)
+            .setAnchor(GridBagConstraints.CENTER)
+            .setInsets(new Insets(6, 6, 6, 6));
+        buttons.clone().setPos(0, 0, 1, 1).build(EmbeddedJDEC.BUTTON_GRID);
 
         EmbeddedJDEC.BUTTON_GRID.setLayout(new GridBagLayout());
 

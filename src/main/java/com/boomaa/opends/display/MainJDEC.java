@@ -10,10 +10,11 @@ import com.boomaa.opends.display.tabs.LogTab;
 import com.boomaa.opends.display.tabs.NTTab;
 import com.boomaa.opends.display.tabs.StatsTab;
 import com.boomaa.opends.headless.elements.HButton;
-import com.boomaa.opends.headless.elements.HCheckBox;
 import com.boomaa.opends.headless.elements.HComboBox;
 import com.boomaa.opends.headless.elements.HFrame;
 import com.boomaa.opends.headless.elements.HOverlayField;
+import com.boomaa.opends.headless.elements.HToggleButton;
+import com.boomaa.opends.headless.elements.HCheckBox;
 
 import java.awt.GridBagLayout;
 import javax.swing.JLabel;
@@ -29,13 +30,14 @@ public interface MainJDEC {
     JLabel TITLE = new JLabel("OpenDS");
     JLabel LINK = MainFrame.createLinkLabel("github.com/Boomaa23/open-ds");
 
-    HCheckBox IS_ENABLED = new HCheckBox("Enable");
+    HToggleButton IS_ENABLED = new HToggleButton("Enable");
     RSLIndicator RSL_INDICATOR = new RSLIndicator();
     HComboBox<RobotMode> ROBOT_DRIVE_MODE = new HComboBox<>(RobotMode.values());
 
     HComboBox<String> ALLIANCE_COLOR = new HComboBox<>("Red", "Blue");
     HComboBox<Integer> ALLIANCE_NUM = new HComboBox<>(1, 2, 3);
 
+    HButton DISABLE_BTN = new HButton("Disable");
     StickyButton RESTART_CODE_BTN = new StickyButton("Restart Robot Code", 10);
     StickyButton RESTART_ROBO_RIO_BTN = new StickyButton("Restart RoboRIO", 10);
     StickyButton ESTOP_BTN = new StickyButton("Emergency Stop", 10);
