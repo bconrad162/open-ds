@@ -133,6 +133,7 @@ public class AddressConstants {
         return lastConnectedRioLabel != null ? lastConnectedRioLabel : "";
     }
 
+
     private static String computeRioLabel(String address) {
         if (address == null) {
             return "";

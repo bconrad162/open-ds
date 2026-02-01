@@ -133,7 +133,7 @@ public class DSLog extends Clock {
     public static void queueEvent(String event, EventSeverity level, boolean logToUi) {
         event = (level == EventSeverity.ERROR ? level.name()
                 : StringUtils.toTitleCase(level.name())) + " " + event;
-        if (logToUi) {
+        if (logToUi && LogFilter.allows(level)) {
             Logger.OUT.println("[DSLog] " + event);
         }
         double currentTimeMs = System.currentTimeMillis();

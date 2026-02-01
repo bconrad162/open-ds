@@ -46,6 +46,11 @@ public class NetworkClock extends Clock {
                             DisplayEndpoint.UPDATER.update(ParserNull.getInstance(), remote, protocol);
                             DisplayEndpoint.NET_IF_INIT.set(false, remote, protocol);
                         } else if (data.length != 0 || protocol != Protocol.UDP) {
+                            if (remote == Remote.ROBO_RIO && protocol == Protocol.TCP && data.length > 0) {
+                                com.boomaa.opends.display.Logger.OUT.println(
+                                    "[DSLog] DS TCP rx " + data.length + " bytes: " + toHexPreview(data, 16)
+                                );
+                            }
                             PacketParser packetParser = DisplayEndpoint.getPacketParser(remote, protocol, data);
                             DisplayEndpoint.UPDATER.update(packetParser, remote, protocol);
                             Debug.println(remote + " " + protocol + " interface connected to " + iface.toString(), EventSeverity.INFO, true);
@@ -101,7 +106,7 @@ public class NetworkClock extends Clock {
         try {
             boolean reachable = exceptionPingTest(ip);
             if (!reachable) {
-                if (!isFms && protocol == Protocol.TCP) {
+                if (!isFms && protocol == Protocol.TCP && com.boomaa.opends.util.Parameter.DEBUG.isPresent()) {
                     com.boomaa.opends.display.Logger.OUT.println(
                         "[DSLog] DS TCP not reachable at " + ip + ":" + ports.getTcp()
                     );
@@ -122,9 +127,9 @@ public class NetworkClock extends Clock {
                 }
             }
         } catch (IOException e) {
-            if (!isFms && protocol == Protocol.TCP) {
+            if (!isFms && protocol == Protocol.TCP && com.boomaa.opends.util.Parameter.DEBUG.isPresent()) {
                 com.boomaa.opends.display.Logger.OUT.println(
-                    "[DSLog] DS TCP connect failed to " + ip + ":" + ports.getTcp() + " (" + e.getClass().getSimpleName() + ")"
+                    "[DSLog] DS TCP connect failed to " + ip + ":" + ports.getTcp()
                 );
             }
             uninitialize(isFms);
@@ -174,5 +179,20 @@ public class NetworkClock extends Clock {
         } catch (UnknownHostException ignored) {
             throw new IOException("Unknown host " + ip);
         }
+    }
+
+    private static String toHexPreview(byte[] data, int maxBytes) {
+        StringBuilder sb = new StringBuilder();
+        int len = Math.min(data.length, maxBytes);
+        for (int i = 0; i < len; i++) {
+            sb.append(String.format("%02X", data[i]));
+            if (i + 1 < len) {
+                sb.append(" ");
+            }
+        }
+        if (data.length > maxBytes) {
+            sb.append(" ...");
+        }
+        return sb.toString();
     }
 }

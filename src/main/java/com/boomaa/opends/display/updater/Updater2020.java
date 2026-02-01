@@ -134,20 +134,23 @@ public class Updater2020 extends ElementUpdater {
 
             TVMList em = tagMap.getMatching(ReceiveTag.ERROR_MESSAGE);
             if (!em.isEmpty()) {
-                TagValueMap<?> errorMessage = em.first();
-                String error = (String) errorMessage.get("Details") + errorMessage.get("Location") + errorMessage.get("Call Stack");
-                String flag = (String) errorMessage.get("Flag");
-                DSLog.queueEvent(
-                        error,
-                        flag != null && flag.equals("Error") ? EventSeverity.ERROR : EventSeverity.WARNING,
-                        true
-                );
+                for (TagValueMap<?> errorMessage : em) {
+                    String details = String.valueOf(errorMessage.get("Details"));
+                    String location = String.valueOf(errorMessage.get("Location"));
+                    String callStack = String.valueOf(errorMessage.get("Call Stack"));
+                    String flag = String.valueOf(errorMessage.get("Flag"));
+                    String error = details + " @ " + location + (callStack.equals("null") ? "" : " | " + callStack);
+                    EventSeverity sev = "Error".equals(flag) ? EventSeverity.ERROR : EventSeverity.WARNING;
+                    DSLog.queueEvent(error, sev, true);
+                }
             }
 
             TVMList so = tagMap.getMatching(ReceiveTag.STANDARD_OUT);
             if (!so.isEmpty()) {
-                TagValueMap<?> stdOut = so.first();
-                DSLog.queueEvent((String) stdOut.get("Message"), EventSeverity.INFO, true);
+                for (TagValueMap<?> stdOut : so) {
+                    String msg = String.valueOf(stdOut.get("Message"));
+                    DSLog.queueEvent(msg, EventSeverity.INFO, true);
+                }
             }
         }
     }
