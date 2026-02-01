@@ -1,0 +1,153 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>OpenDS Web</title>
+    <link rel="stylesheet" href="app.css" />
+  </head>
+  <body>
+    <main class="app">
+      <header class="top">
+        <div>
+          <h1>OpenDS Web</h1>
+          <p class="sub">Local bridge required: ws://127.0.0.1:5805</p>
+        </div>
+        <div class="status">
+          <span id="bridgeState" class="pill offline">Bridge Offline</span>
+        </div>
+      </header>
+
+      <div class="banner">
+        Gamepads only appear after you click this page and press any controller button.
+      </div>
+
+      <nav class="tabs">
+        <button class="tab-btn active" data-tab="connection">Connection</button>
+        <button class="tab-btn" data-tab="joystick">Joystick</button>
+        <button class="tab-btn" data-tab="stats">Stats</button>
+        <button class="tab-btn" data-tab="logs">Logs</button>
+      </nav>
+
+      <section class="tab-panel active" data-tab="connection">
+        <section class="card">
+          <h2>Connection</h2>
+          <div class="row">
+            <label for="teamNum">Team</label>
+            <input id="teamNum" type="text" placeholder="9995" />
+            <button id="connectBtn">Connect</button>
+            <button id="disconnectBtn" class="ghost">Disconnect</button>
+            <button id="reconnectBtn" class="ghost">Reconnect</button>
+            <label><input type="checkbox" id="autoConnect" checked /> Auto‑connect</label>
+          </div>
+          <div class="row">
+            <label>Link</label>
+            <span id="linkLabel">—</span>
+          </div>
+        </section>
+
+        <section class="card">
+          <h2>Robot</h2>
+          <div class="row">
+            <label>Mode</label>
+            <select id="modeSelect">
+              <option value="teleop">Teleop</option>
+              <option value="auto">Auto</option>
+              <option value="test">Test</option>
+            </select>
+            <label>Alliance</label>
+            <select id="allianceColor">
+              <option value="red">Red</option>
+              <option value="blue">Blue</option>
+            </select>
+            <select id="allianceStation">
+              <option value="1">1</option>
+              <option value="2">2</option>
+              <option value="3">3</option>
+            </select>
+            <button id="enableBtn">Enable</button>
+            <button id="disableBtn" class="ghost">Disable</button>
+            <button id="estopBtn" class="danger">E‑Stop</button>
+            <button id="restartCodeBtn" class="ghost">Restart Code</button>
+            <button id="restartRioBtn" class="ghost">Restart RoboRIO</button>
+          </div>
+          <div class="row">
+            <label for="gameData">Game Data</label>
+            <input id="gameData" type="text" placeholder="R or B" />
+            <button id="sendGameDataBtn">Send</button>
+          </div>
+        </section>
+
+        <section class="card">
+          <h2>NetworkTables</h2>
+          <div class="row">
+            <label>Status</label>
+            <span id="ntStatus">Disconnected</span>
+            <button id="ntClearBtn" class="ghost">Clear</button>
+            <button id="ntExportBtn" class="ghost">Export</button>
+          </div>
+          <div class="row">
+            <label>Entries</label>
+          </div>
+          <div id="ntOutput" class="nt-list"></div>
+        </section>
+      </section>
+
+      <section class="tab-panel" data-tab="joystick">
+        <section class="card">
+          <h2>Joysticks</h2>
+          <div id="gamepadList" class="gamepads"></div>
+          <p class="sub">Uses the browser Gamepad API. Click inside this page to allow input.</p>
+          <div class="row">
+            <button id="reloadGamepadsBtn" class="ghost">Reload</button>
+          </div>
+        </section>
+      </section>
+
+      <section class="tab-panel" data-tab="stats">
+        <section class="card">
+          <h2>Stats</h2>
+          <div class="row">
+            <label>Robot</label>
+            <span id="statRobot">—</span>
+            <label>Code</label>
+            <span id="statCode">—</span>
+            <label>EStop</label>
+            <span id="statEstop">—</span>
+            <label>Brownout</label>
+            <span id="statBrownout">—</span>
+          </div>
+          <div class="row">
+            <label>Enabled</label>
+            <span id="statEnabled">—</span>
+            <label>Battery</label>
+            <span id="statBattery">—</span>
+            <label>DS Tx</label>
+            <span id="statDsTx">—</span>
+            <label>Time</label>
+            <span id="statMatchTime">—</span>
+          </div>
+          <div id="statExtra" class="nt-list"></div>
+          <div class="row">
+            <button id="exportStatsBtn" class="ghost">Export</button>
+          </div>
+        </section>
+      </section>
+
+      <section class="tab-panel" data-tab="logs">
+        <section class="card logs">
+          <h2>Logs</h2>
+          <div class="row">
+            <label><input type="checkbox" id="logInfo" /> Info</label>
+            <label><input type="checkbox" id="logWarn" /> Warning</label>
+            <label><input type="checkbox" id="logError" checked /> Error</label>
+            <button id="clearLogsBtn" class="ghost">Clear</button>
+            <button id="exportLogsBtn" class="ghost">Export</button>
+          </div>
+          <pre id="logOutput"></pre>
+        </section>
+      </section>
+    </main>
+    <script src="app.js"></script>
+  </body>
+</html>
