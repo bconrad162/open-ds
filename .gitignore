@@ -17,6 +17,6 @@ wireshark/*
 .project
 *.DS_Store
 *.zip
-*.jar
+
 ods-jre*/
 *.code-workspace
