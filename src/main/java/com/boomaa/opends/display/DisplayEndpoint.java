@@ -39,7 +39,7 @@ public class DisplayEndpoint implements MainJDEC {
     public static NTConnection NETWORK_TABLES = new NTConnection();
     public static InitChecker NET_IF_INIT = new InitChecker();
     public static Integer[] VALID_PROTOCOL_YEARS = { 2025, 2024, 2023, 2022, 2021, 2020, 2016, 2015, 2014 };
-    public static Integer[] UI_PROTOCOL_YEARS = { 2026, 2025, 2024, 2023, 2022, 2021, 2020, 2016, 2015, 2014 };
+    public static Integer[] UI_PROTOCOL_YEARS = { 2025, 2024, 2023, 2022, 2021, 2020, 2016, 2015, 2014 };
 
     private static final ProtocolClass parserClass = new ProtocolClass("com.boomaa.opends.data.receive.parser.Parser");
     private static final ProtocolClass creatorClass = new ProtocolClass("com.boomaa.opends.data.send.creator.Creator");
@@ -62,6 +62,7 @@ public class DisplayEndpoint implements MainJDEC {
                 ControlDevices.updateValues();
                 ControlDevices.checkForRemoval();
                 ControlDevices.findAll();
+                MainJDEC.JOYSTICK_LED.setOn(!ControlDevices.getAll().isEmpty());
             } else {
                 super.end();
             }
@@ -136,9 +137,6 @@ public class DisplayEndpoint implements MainJDEC {
     }
 
     public static int resolveProtocolYear(int uiYear) {
-        if (uiYear == 2026) {
-            return 2025;
-        }
         return uiYear;
     }
 

@@ -41,10 +41,12 @@ import java.util.function.Consumer;
 import javax.swing.ImageIcon;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
+import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.SwingUtilities;
 import javax.swing.SwingWorker;
 import javax.swing.UIManager;
+import javax.swing.Timer;
 
 public class MainFrame implements MainJDEC {
     public static final Image ICON = Toolkit.getDefaultToolkit()
@@ -56,6 +58,10 @@ public class MainFrame implements MainJDEC {
         .setInsets(new Insets(5, 5, 5, 5))
         .setFill(GridBagConstraints.BOTH)
         .setAnchor(GridBagConstraints.CENTER);
+    private static boolean lastEnabledState = false;
+    private static final Timer enabledBlinkTimer = new Timer(450, (e) -> {
+        // no-op: blinking disabled to match stock Driver Station behavior
+    });
 
     private MainFrame() {
     }
@@ -128,6 +134,16 @@ public class MainFrame implements MainJDEC {
         IS_ENABLED.addItemListener((e) -> RSL_INDICATOR.setFlashing(e.getStateChange() == ItemEvent.SELECTED));
         IS_ENABLED.addItemListener((e) -> Theme.styleToggleButton(IS_ENABLED.getElement(),
                 e.getStateChange() == ItemEvent.SELECTED));
+        IS_ENABLED.addItemListener((e) -> {
+            boolean selected = e.getStateChange() == ItemEvent.SELECTED;
+            if (selected && !lastEnabledState) {
+                ENABLED_BANNER.setVisible(true);
+            }
+            if (!selected) {
+                ENABLED_BANNER.setVisible(false);
+            }
+            lastEnabledState = selected;
+        });
         DISABLE_BTN.addActionListener((e) -> IS_ENABLED.setSelected(false));
 
         RESTART_CODE_BTN.init();
@@ -140,6 +156,23 @@ public class MainFrame implements MainJDEC {
             IS_ENABLED.setSelected(false);
             Debug.println("Emergency Stop (ESTOP) initiated");
         });
+        RESTART_ROBO_RIO_BTN.init();
+        RESTART_ROBO_RIO_BTN.addActionListener((e) -> {
+            if (!Parameter.HEADLESS.isPresent()) {
+                int result = JOptionPane.showConfirmDialog(
+                        FRAME.getElement(),
+                        "Restart RoboRIO now?",
+                        "Confirm Restart",
+                        JOptionPane.YES_NO_OPTION,
+                        JOptionPane.WARNING_MESSAGE
+                );
+                if (result != JOptionPane.YES_OPTION) {
+                    return;
+                }
+            }
+            IS_ENABLED.setSelected(false);
+            Debug.println("Restarting RoboRIO");
+        });
         RECONNECT_BTN.addActionListener((e) -> {
             Debug.println("Reconnecting/resetting robot interfaces");
             unsetAllInterfaces();
@@ -147,8 +180,6 @@ public class MainFrame implements MainJDEC {
 
         // Debug println method checks this, but checking before adding a listener improves performance
         if (Parameter.DEBUG.isPresent()) {
-            RESTART_ROBO_RIO_BTN.init();
-            RESTART_ROBO_RIO_BTN.addActionListener((e) -> Debug.println("Restarting RoboRIO"));
             IS_ENABLED.addItemListener((e) -> Debug.println(e.getStateChange() == ItemEvent.SELECTED
                     ? "Robot Enabled" : "Robot Disabled"));
             FMS_CONNECT.addItemListener((e) -> Debug.println(e.getStateChange() == ItemEvent.SELECTED
@@ -216,6 +247,9 @@ public class MainFrame implements MainJDEC {
         Theme.styleGhostButton(DISABLE_BTN.getElement());
         Theme.styleToggleButton(IS_ENABLED.getElement(), IS_ENABLED.isSelected());
 
+        ENABLED_BANNER.setForeground(Theme.ACCENT);
+        ENABLED_BANNER.setVisible(false);
+
         JPanel headerCard = Theme.cardPanel();
         JPanel controlCard = Theme.cardPanel();
         JPanel actionCard = Theme.cardPanel();
@@ -260,20 +294,21 @@ public class MainFrame implements MainJDEC {
                 .setFill(GridBagConstraints.HORIZONTAL)
                 .setAnchor(GridBagConstraints.LINE_START);
         control.clone().setPos(0, 0, 1, 1).setFill(GridBagConstraints.NONE).build(RSL_INDICATOR);
-        control.clone().setPos(1, 0, 1, 1).setFill(GridBagConstraints.NONE).build(IS_ENABLED);
-        control.clone().setPos(2, 0, 1, 1).setFill(GridBagConstraints.NONE).build(DISABLE_BTN);
-        control.clone().setPos(3, 0, 1, 1).setFill(GridBagConstraints.NONE).build(ROBOT_DRIVE_MODE);
-        control.clone().setPos(0, 1, 2, 1).setFill(GridBagConstraints.NONE).build(new JLabel("Alliance Station"));
-        control.clone().setPos(0, 2, 1, 1).build(ALLIANCE_NUM);
-        control.clone().setPos(1, 2, 1, 1).build(ALLIANCE_COLOR);
-        control.clone().setPos(0, 3, 1, 1).setFill(GridBagConstraints.NONE).build(new JLabel("Team Number"));
-        control.clone().setPos(1, 3, 1, 1).build(TEAM_NUMBER);
-        control.clone().setPos(0, 4, 1, 1).setFill(GridBagConstraints.NONE).build(new JLabel("Game Data"));
-        control.clone().setPos(1, 4, 1, 1).build(GAME_DATA);
-        control.clone().setPos(0, 5, 1, 1).setFill(GridBagConstraints.NONE).build(new JLabel("Protocol Year"));
-        control.clone().setPos(1, 5, 1, 1).build(PROTOCOL_YEAR);
-        control.clone().setPos(2, 5, 1, 1).setFill(GridBagConstraints.NONE).build(new JLabel("Reconnect"));
-        control.clone().setPos(2, 6, 1, 1).setFill(GridBagConstraints.NONE).build(RECONNECT_BTN);
+        control.clone().setPos(1, 0, 2, 1).setFill(GridBagConstraints.NONE).build(ENABLED_BANNER);
+        control.clone().setPos(1, 1, 1, 1).setFill(GridBagConstraints.NONE).build(IS_ENABLED);
+        control.clone().setPos(2, 1, 1, 1).setFill(GridBagConstraints.NONE).build(DISABLE_BTN);
+        control.clone().setPos(3, 1, 1, 1).setFill(GridBagConstraints.NONE).build(ROBOT_DRIVE_MODE);
+        control.clone().setPos(0, 2, 2, 1).setFill(GridBagConstraints.NONE).build(new JLabel("Alliance Station"));
+        control.clone().setPos(0, 3, 1, 1).build(ALLIANCE_NUM);
+        control.clone().setPos(1, 3, 1, 1).build(ALLIANCE_COLOR);
+        control.clone().setPos(0, 4, 1, 1).setFill(GridBagConstraints.NONE).build(new JLabel("Team Number"));
+        control.clone().setPos(1, 4, 1, 1).build(TEAM_NUMBER);
+        control.clone().setPos(0, 5, 1, 1).setFill(GridBagConstraints.NONE).build(new JLabel("Game Data"));
+        control.clone().setPos(1, 5, 1, 1).build(GAME_DATA);
+        control.clone().setPos(0, 6, 1, 1).setFill(GridBagConstraints.NONE).build(new JLabel("Protocol Year"));
+        control.clone().setPos(1, 6, 1, 1).build(PROTOCOL_YEAR);
+        control.clone().setPos(2, 6, 1, 1).setFill(GridBagConstraints.NONE).build(new JLabel("Reconnect"));
+        control.clone().setPos(2, 7, 1, 1).setFill(GridBagConstraints.NONE).build(RECONNECT_BTN);
 
         GBCPanelBuilder actions = new GBCPanelBuilder(actionCard)
                 .setInsets(new Insets(6, 6, 6, 6))
@@ -301,6 +336,13 @@ public class MainFrame implements MainJDEC {
         status.clone().setPos(1, 5, 1, 1).build(FMS_CONNECTION_STATUS);
         status.clone().setPos(0, 6, 1, 1).build(new JLabel("Time"));
         status.clone().setPos(1, 6, 1, 1).build(MATCH_TIME);
+
+        control.clone().setPos(3, 2, 1, 1).setFill(GridBagConstraints.NONE).build(new JLabel("Communication"));
+        control.clone().setPos(4, 2, 1, 1).setFill(GridBagConstraints.NONE).build(COMM_LED);
+        control.clone().setPos(3, 3, 1, 1).setFill(GridBagConstraints.NONE).build(new JLabel("Robot Code"));
+        control.clone().setPos(4, 3, 1, 1).setFill(GridBagConstraints.NONE).build(CODE_LED);
+        control.clone().setPos(3, 4, 1, 1).setFill(GridBagConstraints.NONE).build(new JLabel("Joystick"));
+        control.clone().setPos(4, 4, 1, 1).setFill(GridBagConstraints.NONE).build(JOYSTICK_LED);
 
         Debug.println("Swing components initialized and ready for display");
     }

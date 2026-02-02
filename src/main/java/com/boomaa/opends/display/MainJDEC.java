@@ -1,6 +1,7 @@
 package com.boomaa.opends.display;
 
 import com.boomaa.opends.display.elements.HideableLabel;
+import com.boomaa.opends.display.elements.LedIndicator;
 import com.boomaa.opends.display.elements.MultiValueLabel;
 import com.boomaa.opends.display.elements.RSLIndicator;
 import com.boomaa.opends.display.elements.StickyButton;
@@ -29,6 +30,7 @@ public interface MainJDEC {
 
     JLabel TITLE = new JLabel("OpenDS");
     JLabel LINK = MainFrame.createLinkLabel("github.com/Boomaa23/open-ds");
+    JLabel ENABLED_BANNER = new JLabel("ROBOT ENABLED");
 
     HToggleButton IS_ENABLED = new HToggleButton("Enable");
     RSLIndicator RSL_INDICATOR = new RSLIndicator();
@@ -61,6 +63,11 @@ public interface MainJDEC {
     HideableLabel ESTOP_STATUS = new HideableLabel(false, "ESTOP");
     HideableLabel MATCH_TIME = new HideableLabel(false, "0");
     MultiValueLabel ROBOT_CODE_STATUS = new MultiValueLabel(false, "Running", "Initializing");
+    java.awt.Color LED_ON = new java.awt.Color(34, 197, 94);
+    java.awt.Color LED_OFF = new java.awt.Color(239, 68, 68);
+    LedIndicator COMM_LED = new LedIndicator(LED_ON, LED_OFF);
+    LedIndicator CODE_LED = new LedIndicator(LED_ON, LED_OFF);
+    LedIndicator JOYSTICK_LED = new LedIndicator(LED_ON, LED_OFF);
 
     JLabel CHALLENGE_RESPONSE = new JLabel("");
 

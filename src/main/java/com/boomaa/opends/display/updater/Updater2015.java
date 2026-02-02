@@ -27,6 +27,8 @@ public class Updater2015 extends ElementUpdater {
         } else {
             ROBOT_CODE_STATUS.forceHide();
         }
+        COMM_LED.setOn(true);
+        CODE_LED.setOn(!rioUdp.getStatus().contains(Status.CODE_INIT));
         BAT_VOLTAGE.setText(StringUtils.padDouble(NumberUtils.roundTo(rioUdp.getBatteryVoltage(), 2), 2) + " V");
         FMS_CONNECTION_STATUS.forceDisplay();
 
@@ -89,6 +91,8 @@ public class Updater2015 extends ElementUpdater {
         BAT_VOLTAGE.setText("0.00 V");
         ROBOT_CODE_STATUS.forceHide();
         ESTOP_STATUS.forceHide();
+        COMM_LED.setOn(false);
+        CODE_LED.setOn(false);
     }
 
     @Override

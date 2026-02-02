@@ -15,6 +15,8 @@ public class Updater2014 extends ElementUpdater {
         ESTOP_STATUS.setDisplay(rioUdp.isEmergencyStopped());
         BAT_VOLTAGE.setText(StringUtils.padDouble(NumberUtils.roundTo(rioUdp.getBatteryVoltage(), 2), 2) + " V");
         ROBOT_CONNECTION_STATUS.forceDisplay();
+        COMM_LED.setOn(true);
+        CODE_LED.setOn(true);
     }
 
     @Override
@@ -45,6 +47,8 @@ public class Updater2014 extends ElementUpdater {
         ESTOP_STATUS.forceHide();
         BAT_VOLTAGE.setText("0.00 V");
         ROBOT_CONNECTION_STATUS.forceHide();
+        COMM_LED.setOn(false);
+        CODE_LED.setOn(false);
     }
 
     @Override

@@ -50,6 +50,8 @@ public class Updater2020 extends ElementUpdater {
             ROBOT_CONNECTION_STATUS.forceHide();
             RIO_CONNECTION_PATH.forceHide();
         }
+        COMM_LED.setOn(robotConn);
+        CODE_LED.setOn(rioUdp.getTrace().contains(Trace.ROBOTCODE));
 
         BAT_VOLTAGE.setText(StringUtils.padDouble(NumberUtils.roundTo(rioUdp.getBatteryVoltage(), 2), 2) + " V");
 
@@ -200,6 +202,8 @@ public class Updater2020 extends ElementUpdater {
         RIO_CONNECTION_PATH.forceHide();
         ROBOT_CODE_STATUS.forceHide();
         ESTOP_STATUS.forceHide();
+        COMM_LED.setOn(false);
+        CODE_LED.setOn(false);
     }
 
     @Override
