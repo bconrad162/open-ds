@@ -6,7 +6,7 @@
 
 A reverse-engineered lightweight FRC Driver Station alternative for Windows, Linux, and macOS
 
-Download [here](https://boomaa23.github.io/open-ds/#dl-jar) ([JDK/JRE 8+](https://adoptopenjdk.net/) required) or [here](https://boomaa23.github.io/open-ds/#dl-script) (JRE downloaded automatically).
+Download [here](https://github.com/bconrad162/open-ds/releases/download/4.0.0/OpenDS.jar) ([JDK/JRE 8+](https://www.oracle.com/java/technologies/downloads/#jdk21) required).
 
 Copyright (C) 2020-2025 Boomaa23
 
