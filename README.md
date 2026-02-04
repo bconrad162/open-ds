@@ -69,8 +69,7 @@ java -version
 If that prints a version number (like `1.8.x` or `11.x`), you are good.
 
 If Java is missing, install a JDK (it includes the JRE):
-* Recommended: [Eclipse Temurin (Adoptium)](https://adoptium.net/)
-* Windows users can also use the Microsoft Build of OpenJDK if their school already has it installed.
+* Recommended: [Oracle JDK 25](https://www.oracle.com/java/technologies/downloads/#jdk21)
 
 ### Run the jar from the command line
 After downloading `OpenDS.jar`, open a terminal/command prompt in the same folder and run:
