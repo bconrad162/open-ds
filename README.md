@@ -59,9 +59,28 @@ OpenDS is intended for testing use only.
     
 
 ## Setup
-Download the stable jar from [here](https://boomaa23.github.io/open-ds/#dl-jar) and run. There are no prerequisites besides having a Java installation with [JRE 8](https://adoptopenjdk.net/) or newer. The JRE is included with any installation of the same JDK version.
+Download the stable jar from [here](https://github.com/bconrad162/open-ds/releases/download/4.0.0/OpenDS.jar) and run. There are no prerequisites besides having a Java installation with JRE 8 or newer (the JRE is included with any installation of the same JDK version).
 
-If you do not have Java and/or want a single install/run script, download [this script](https://boomaa23.github.io/open-ds/#dl-script) instead and use it to start OpenDS. It will download OpenDS and a copy of Java for it to use. Use the same script to re-launch OpenDS.
+### Get Java (JRE/JDK 8+)
+If you are not sure whether Java is installed, open a terminal/command prompt and run:
+```bash
+java -version
+```
+If that prints a version number (like `1.8.x` or `11.x`), you are good.
+
+If Java is missing, install a JDK (it includes the JRE):
+* Recommended: [Eclipse Temurin (Adoptium)](https://adoptium.net/)
+* Windows users can also use the Microsoft Build of OpenJDK if their school already has it installed.
+
+### Run the jar from the command line
+After downloading `OpenDS.jar`, open a terminal/command prompt in the same folder and run:
+```bash
+java -jar OpenDS.jar
+```
+If you want extra logs, add `--debug`:
+```bash
+java -jar OpenDS.jar --debug
+```
 
 
 ### Troubleshooting
